@@ -66,14 +66,14 @@ export function updateSpeedDisplay(speed) {
 }
 
 export function updateGear(speed) {
-  // Dummy gear logic based on speed (standard bike ratios)
+  // Dummy gear logic based on speed (km/h thresholds)
   let g = "N";
-  if (speed > 5 && speed < 20) g = "1";
-  else if (speed >= 20 && speed < 35) g = "2";
-  else if (speed >= 35 && speed < 50) g = "3";
-  else if (speed >= 50 && speed < 65) g = "4";
-  else if (speed >= 65 && speed < 80) g = "5";
-  else if (speed >= 80) g = "6";
+  if (speed > 8 && speed < 30) g = "1";
+  else if (speed >= 30 && speed < 55) g = "2";
+  else if (speed >= 55 && speed < 80) g = "3";
+  else if (speed >= 80 && speed < 105) g = "4";
+  else if (speed >= 105 && speed < 130) g = "5";
+  else if (speed >= 130) g = "6";
   document.getElementById("gear").innerText = g;
 }
 
