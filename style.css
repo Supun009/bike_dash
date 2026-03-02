@@ -311,3 +311,49 @@ body {
     height: 100vh;
   }
 }
+/* Glow effects */
+.glow-cyan {
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+  color: var(--accent-cyan) !important;
+}
+.glow-blue {
+  text-shadow: 0 0 10px rgba(0, 100, 255, 0.8);
+  color: #00a2ff !important;
+}
+.glow-green {
+  text-shadow: 0 0 10px rgba(0, 255, 106, 0.8);
+  color: var(--accent-green) !important;
+}
+.glow-red {
+  text-shadow: 0 0 20px rgba(255, 45, 85, 0.9);
+  color: var(--accent-red) !important;
+}
+
+.fan-warning {
+  font-family: "Orbitron";
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--accent-red);
+  border: 2px solid var(--accent-red);
+  padding: 2px 8px;
+  border-radius: 4px;
+  animation: blink 0.5s infinite alternate;
+  margin-bottom: -10px;
+}
+
+.hidden {
+  display: none;
+}
+
+@keyframes blink {
+  from {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 10px var(--accent-red);
+  }
+  to {
+    opacity: 0.3;
+    transform: scale(0.95);
+    box-shadow: none;
+  }
+}

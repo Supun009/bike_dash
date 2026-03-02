@@ -16,11 +16,27 @@ export function updateUI(data) {
   // RPM Logic
   updateRPMSVG(data.rpm);
 
-  // Temp & Volt
-  document.getElementById("temp").innerText = data.temp.toFixed(1);
-  document.getElementById("volt").innerText = data.volt.toFixed(1);
+  // Temperature Logic
+  const tempElement = document.getElementById("temp");
+  const fanWarning = document.getElementById("fanWarning");
+  tempElement.innerText = data.temp.toFixed(1);
 
-  // Voltage Warning
+  // Remove existing color classes
+  tempElement.classList.remove("glow-blue", "glow-green", "glow-red");
+
+  if (data.temp < 75) {
+    tempElement.classList.add("glow-blue");
+    fanWarning.classList.add("hidden");
+  } else if (data.temp >= 75 && data.temp <= 110) {
+    tempElement.classList.add("glow-green");
+    fanWarning.classList.remove("hidden"); // FAN ON warning at 75+
+  } else {
+    tempElement.classList.add("glow-red");
+    fanWarning.classList.remove("hidden");
+  }
+
+  // Voltage Logic
+  document.getElementById("volt").innerText = data.volt.toFixed(1);
   const voltElement = document.getElementById("volt");
   if (data.volt < 11.5) {
     voltElement.classList.add("glow-red");
