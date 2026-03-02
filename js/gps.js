@@ -24,33 +24,49 @@ export function initGPS(onSpeedUpdate, onGPSStatus) {
       const coords = position.coords;
       const currentTime = position.timestamp;
 
-      // Source 1: Browser provided speed
+      // Filter out low accuracy updates (skip if horizontal error > 30m)
+      if (coords.accuracy > 30) {
+        console.warn(`GPS: Poor accuracy ignored (${coords.accuracy}m)`);
+        onGPSStatus(`GPS: Low Acc (${coords.accuracy.toFixed(0)}m)`);
+        return;
+      }
+
+      // Source 1: Browser provided speed (Smoothed by OS/Hardware)
       let speedKMH =
-        coords.speed !== null && coords.speed !== undefined
+        coords.speed !== null && coords.speed !== undefined && coords.speed >= 0
           ? coords.speed * 3.6
           : null;
 
-      // Source 2: Manual calculation fallback (Distance / Time)
+      // Source 2: Manual calculation fallback
       if (speedKMH === null && lastPosition && lastTime) {
-        const distance = calculateDistance(
-          lastPosition.latitude,
-          lastPosition.longitude,
-          coords.latitude,
-          coords.longitude,
-        );
         const timeDiff = (currentTime - lastTime) / 1000; // in seconds
-        if (timeDiff > 0) {
+
+        // Only calculate if at least 1 second has passed to reduce jitter impact
+        if (timeDiff >= 1) {
+          const distance = calculateDistance(
+            lastPosition.latitude,
+            lastPosition.longitude,
+            coords.latitude,
+            coords.longitude,
+          );
+
           const calculatedSpeedMS = distance / timeDiff;
-          // Filter out noise (only use if distance moved > 2m)
-          if (distance > 2) {
+
+          // Only update if moved more than 3 meters (filtering GPS "drift")
+          if (distance > 3) {
             speedKMH = calculatedSpeedMS * 3.6;
           } else {
             speedKMH = 0;
           }
+        } else {
+          // Not enough time passed, keep current speed or wait
+          return;
         }
       }
 
-      // Default to 0 if everything fails
+      // Safety Cap: Bikes rarely go 200+ km/h. Clip unrealistic jumps.
+      if (speedKMH > 199) speedKMH = 0;
+
       const finalSpeed = Math.max(0, Math.round(speedKMH || 0));
 
       console.log(`GPS: ${finalSpeed} km/h (Acc: ${coords.accuracy}m)`);

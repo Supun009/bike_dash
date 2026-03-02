@@ -62,19 +62,6 @@ export function updateRPMSVG(rpm) {
 
 export function updateSpeedDisplay(speed) {
   document.getElementById("speed").innerText = speed;
-  updateGear(speed);
-}
-
-export function updateGear(speed) {
-  // Dummy gear logic based on speed (km/h thresholds)
-  let g = "N";
-  if (speed > 8 && speed < 30) g = "1";
-  else if (speed >= 30 && speed < 55) g = "2";
-  else if (speed >= 55 && speed < 80) g = "3";
-  else if (speed >= 80 && speed < 105) g = "4";
-  else if (speed >= 105 && speed < 130) g = "5";
-  else if (speed >= 130) g = "6";
-  document.getElementById("gear").innerText = g;
 }
 
 export function updateGPSStatus(status) {
