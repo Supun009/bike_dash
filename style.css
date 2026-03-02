@@ -239,12 +239,54 @@ body {
   font-weight: 400;
 }
 
-#gpsStatus {
+#gpsStatusContainer {
   position: fixed;
   bottom: 5px;
   left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 100;
+}
+
+#gpsStatus {
   font-size: 10px;
-  color: #444;
+  color: #666;
+  font-family: "Orbitron";
+}
+
+.gps-icon {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #444;
+  transition: all 0.3s ease;
+}
+
+.gps-icon.active {
+  background: var(--accent-green);
+  box-shadow: 0 0 10px var(--accent-green);
+  animation: pulse-gps 1s infinite alternate;
+}
+
+.gps-icon.warning {
+  background: #ffaa00;
+  box-shadow: 0 0 8px #ffaa00;
+}
+
+.gps-icon.inactive {
+  background: #444;
+}
+
+@keyframes pulse-gps {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
 }
 
 /* Mobile Portrait - Forced Stacking */

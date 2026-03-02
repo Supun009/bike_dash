@@ -29,6 +29,7 @@ connectBtn.addEventListener("click", handleConnect);
 setInterval(ui.updateClock, 1000);
 ui.updateClock();
 
+console.log("Initializing GPS tracking...");
 initGPS(
   (speed) => ui.updateSpeedDisplay(speed),
   (status) => ui.updateGPSStatus(status),

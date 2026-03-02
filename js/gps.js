@@ -24,11 +24,20 @@ export function initGPS(onSpeedUpdate, onGPSStatus) {
       const coords = position.coords;
       const currentTime = position.timestamp;
 
-      // Filter out low accuracy updates (skip if horizontal error > 30m)
-      if (coords.accuracy > 30) {
-        console.warn(`GPS: Poor accuracy ignored (${coords.accuracy}m)`);
-        onGPSStatus(`GPS: Low Acc (${coords.accuracy.toFixed(0)}m)`);
+      const gpsIcon = document.getElementById("gpsIcon");
+
+      // Relaxed accuracy check (skip if horizontal error > 100m)
+      if (coords.accuracy > 100) {
+        console.warn(`GPS: Poor accuracy (${coords.accuracy}m)`);
+        onGPSStatus(`Low Acc (${coords.accuracy.toFixed(0)}m)`);
+        if (gpsIcon) {
+          gpsIcon.className = "gps-icon warning";
+        }
         return;
+      }
+
+      if (gpsIcon) {
+        gpsIcon.className = "gps-icon active";
       }
 
       // Source 1: Browser provided speed (Smoothed by OS/Hardware)
@@ -79,6 +88,9 @@ export function initGPS(onSpeedUpdate, onGPSStatus) {
     },
     (err) => {
       console.error("GPS Error:", err);
+      const gpsIcon = document.getElementById("gpsIcon");
+      if (gpsIcon) gpsIcon.className = "gps-icon inactive";
+
       let msg = "GPS Error";
       if (err.code === 1) msg = "Location Access Denied";
       if (err.code === 2) msg = "Position Unavailable";
