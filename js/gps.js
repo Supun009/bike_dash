@@ -87,20 +87,22 @@ export function initGPS(onSpeedUpdate, onGPSStatus) {
         onSpeedUpdate(finalSpeed);
       }
 
-      // Update status indicator
+      // Update status indicator with estimated source
+      let source = "";
       if (acc <= 10) {
-        onGPSStatus(`GPS: Excellent (${acc.toFixed(0)}m)`);
+        source = "📡 SAT"; // Real GPS satellite
         setGPSIcon("active");
       } else if (acc <= 50) {
-        onGPSStatus(`GPS: Good (${acc.toFixed(0)}m)`);
+        source = "📡 GPS"; // GPS with some interference
         setGPSIcon("active");
       } else if (acc <= 200) {
-        onGPSStatus(`GPS: Fair (${acc.toFixed(0)}m)`);
+        source = "📶 WiFi"; // WiFi-based positioning
         setGPSIcon("warning");
       } else {
-        onGPSStatus(`GPS: Weak (${acc.toFixed(0)}m)`);
+        source = "🗼 Cell"; // Cell tower triangulation
         setGPSIcon("warning");
       }
+      onGPSStatus(`${source} (${acc.toFixed(0)}m)`);
 
       // Always store position for next calculation
       lastPosition = coords;
