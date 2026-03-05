@@ -69,7 +69,9 @@ export function playStartupAnimation() {
       requestAnimationFrame(animate);
     } else {
       isAnimatingStartup = false;
-      smoothedRPM = 0; // Reset for physical data
+      smoothedRPM = 0; // Reset internal smoothing state
+      // Physically force the needle to zero to avoid any LERP residue
+      fillPath.style.strokeDashoffset = totalLength;
     }
   }
 
@@ -82,10 +84,13 @@ export function updateRPMSVG(rpm, force = false) {
   // Max RPM in UI is 14000
   const maxRPM = 14000;
 
-  // Simple smoothing (LERP) to make the animation feel fluid
-  // especially since hardware data might be jittery
-  const smoothingFactor = 0.3;
-  smoothedRPM = smoothedRPM + (rpm - smoothedRPM) * smoothingFactor;
+  // Bypass smoothing during forced animations (like startup sequence)
+  if (force) {
+    smoothedRPM = rpm;
+  } else {
+    const smoothingFactor = 0.3;
+    smoothedRPM = smoothedRPM + (rpm - smoothedRPM) * smoothingFactor;
+  }
 
   const ratio = Math.min(smoothedRPM / maxRPM, 1);
   const offset = totalLength - totalLength * ratio;
