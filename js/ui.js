@@ -45,14 +45,22 @@ export function updateUI(data) {
   }
 }
 
+let smoothedRPM = 0;
+
 export function updateRPMSVG(rpm) {
   // Max RPM in UI is 14000
   const maxRPM = 14000;
-  const ratio = Math.min(rpm / maxRPM, 1);
+
+  // Simple smoothing (LERP) to make the animation feel fluid
+  // especially since hardware data might be jittery
+  const smoothingFactor = 0.3;
+  smoothedRPM = smoothedRPM + (rpm - smoothedRPM) * smoothingFactor;
+
+  const ratio = Math.min(smoothedRPM / maxRPM, 1);
   const offset = totalLength - totalLength * ratio;
   fillPath.style.strokeDashoffset = offset;
 
-  // Color change near redline
+  // Color change near redline based on actual rpm for immediate warning
   if (rpm > 12000) {
     fillPath.style.stroke = "var(--accent-red)";
   } else {

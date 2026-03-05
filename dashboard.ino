@@ -65,17 +65,24 @@ void setup() {
 }
 
 void loop() {
-  if (millis() - lastMillis >= 1000) {
-    int rpm = pulseCount * 60;
+  if (millis() - lastMillis >= 100) {
+    int rpm = pulseCount * 600; // 10 updates/sec * 60 sec = 600 multiplier
     pulseCount = 0;
     
-    sensors.requestTemperatures();
-    float temp = sensors.getTempCByIndex(0);
+    // Only request temp every 1000ms to avoid blocking for too long
+    static unsigned long lastTempRequest = 0;
+    static float lastTemp = 0;
+    if (millis() - lastTempRequest >= 1000) {
+      sensors.requestTemperatures();
+      lastTemp = sensors.getTempCByIndex(0);
+      lastTempRequest = millis();
+    }
+    
     float volt = analogRead(voltPin) * (3.3 / 4095.0) * 6.2;
 
     if (deviceConnected) {
       // Send data as a comma-separated string: "RPM,TEMP,VOLT"
-      String data = String(rpm) + "," + String(temp, 1) + "," + String(volt, 1);
+      String data = String(rpm) + "," + String(lastTemp, 1) + "," + String(volt, 1);
       pCharacteristic->setValue(data.c_str());
       pCharacteristic->notify();
     }
