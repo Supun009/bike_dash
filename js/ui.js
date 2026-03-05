@@ -1,6 +1,8 @@
 const fillPath = document.getElementById("rpm-path-fill");
 const totalLength = fillPath.getTotalLength();
 fillPath.style.strokeDasharray = totalLength;
+// Set needle to zero immediately with no transition to avoid load flash
+fillPath.style.transition = "none";
 fillPath.style.strokeDashoffset = totalLength;
 
 export function updateClock() {
@@ -51,31 +53,50 @@ let isAnimatingStartup = false;
 export function playStartupAnimation() {
   isAnimatingStartup = true;
   const maxRPM = 14000;
-  const duration = 1500; // 1.5 seconds sweep up and down
-  const startTime = performance.now();
+  const duration = 1800; // sweep up and down
 
-  function animate(currentTime) {
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
+  // Wait 600ms before starting so the page settles
+  setTimeout(() => {
+    const startTime = performance.now();
 
-    // Sinusoidal sweep: 0 -> 1 -> 0
-    // Math.sin mapping: [0, 1] input to [0, PI] results in [0, 1, 0]
-    const sweepProgress = Math.sin(progress * Math.PI);
-    const targetRPM = sweepProgress * maxRPM;
+    function animate(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
 
-    updateRPMSVG(targetRPM, true);
+      // Linear 0->1->0 with ease-in-out applied
+      let sweepProgress;
+      if (progress < 0.5) {
+        sweepProgress = progress * 2;
+      } else {
+        sweepProgress = 1 - (progress - 0.5) * 2;
+      }
+      const easedProgress =
+        sweepProgress < 0.5
+          ? 2 * sweepProgress * sweepProgress
+          : 1 - Math.pow(-2 * sweepProgress + 2, 2) / 2;
 
-    if (progress < 1) {
-      requestAnimationFrame(animate);
-    } else {
-      isAnimatingStartup = false;
-      smoothedRPM = 0; // Reset internal smoothing state
-      // Physically force the needle to zero to avoid any LERP residue
-      fillPath.style.strokeDashoffset = totalLength;
+      const targetRPM = easedProgress * maxRPM;
+
+      // No CSS transition during JS-driven animation
+      fillPath.style.transition = "none";
+      updateRPMSVG(targetRPM, true);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        // Animation done: snap to zero, then enable smooth transitions for live data
+        isAnimatingStartup = false;
+        smoothedRPM = 0;
+        fillPath.style.strokeDashoffset = totalLength;
+        setTimeout(() => {
+          fillPath.style.transition =
+            "stroke-dashoffset 0.2s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease";
+        }, 50);
+      }
     }
-  }
 
-  requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
+  }, 600);
 }
 
 export function updateRPMSVG(rpm, force = false) {
