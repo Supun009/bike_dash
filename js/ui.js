@@ -46,8 +46,39 @@ export function updateUI(data) {
 }
 
 let smoothedRPM = 0;
+let isAnimatingStartup = false;
 
-export function updateRPMSVG(rpm) {
+export function playStartupAnimation() {
+  isAnimatingStartup = true;
+  const maxRPM = 14000;
+  const duration = 1500; // 1.5 seconds sweep up and down
+  const startTime = performance.now();
+
+  function animate(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // Sinusoidal sweep: 0 -> 1 -> 0
+    // Math.sin mapping: [0, 1] input to [0, PI] results in [0, 1, 0]
+    const sweepProgress = Math.sin(progress * Math.PI);
+    const targetRPM = sweepProgress * maxRPM;
+
+    updateRPMSVG(targetRPM, true);
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      isAnimatingStartup = false;
+      smoothedRPM = 0; // Reset for physical data
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+export function updateRPMSVG(rpm, force = false) {
+  if (isAnimatingStartup && !force) return;
+
   // Max RPM in UI is 14000
   const maxRPM = 14000;
 
